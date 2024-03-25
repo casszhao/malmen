@@ -1,0 +1,9 @@
+wandb/*
+cache/*
+fever/*
+zsre/*
+*.bin*
+*pycache*
+*.log
+*.pth
+/checkpoints*

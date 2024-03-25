@@ -1,5 +1,8 @@
 from typing import Dict, List
 from omegaconf import DictConfig
+import os
+import logging
+
 
 from collections import Counter
 import numpy as np
@@ -58,8 +61,10 @@ class BaseEditor:
             config.editor.meta_lr
         )
         if config.editor.load_checkpoint:
-            self.net.load_state_dict(torch.load(f"checkpoints/{config.model.name_or_path}_{config.editor.name}_{str(config.data.n_edits)}_net.pth"))
-            self.opt.load_state_dict(torch.load(f"checkpoints/{config.model.name_or_path}_{config.editor.name}_{str(config.data.n_edits)}_opt.pth"))
+            modelname = str(self.config.model.name_or_path)
+            if '/' in modelname: modelname = modelname.split('/')[-1]
+            self.net.load_state_dict(torch.load(f"checkpoints/{modelname}_{config.editor.name}_{str(config.data.n_edits)}_net.pth"))
+            self.opt.load_state_dict(torch.load(f"checkpoints/{modelname}_{config.editor.name}_{str(config.data.n_edits)}_opt.pth"))
 
     def edit_model(
         self,
@@ -110,10 +115,12 @@ class BaseEditor:
                 
             self.update_hypernet(param_shifts)
 
-            wandb.log({
+            # wandb.log({
+            logging.info({
                 "gen_loss": np.mean(gen_losses),
                 "loc_loss": np.mean(loc_losses)
-            })
+            }) # cass
+
     
     def valid(self, loader: DataLoader):
           
@@ -134,13 +141,20 @@ class BaseEditor:
                     
             self.edit_model(param_shifts, True)
             
-            wandb.log({
+            # wandb.log({
+            logging.info({
                 "ES": np.mean(edit_succs),
                 "GS": np.mean(gen_succs),
                 "LS": np.mean(loc_succs)
-            })
+            }) #  cass
+
+        os.makedirs(f"checkpoints/test_model/", exist_ok=True)
+        self.model.save_pretrained('checkpoints/test_model/')
+        logging.info('   SAVED HUGGINGFACE 1 ===> checkpoints/test_model/')
     
     def cache(self, tuples: List[Dict[str, torch.LongTensor]]):
+
+        logging.info(f'length of tuples: {len(tuples)}')
 
         for idx, t in enumerate(tuples):
             
@@ -153,19 +167,34 @@ class BaseEditor:
                 cross_entropy(logits, t["labels"]).backward()
         
             for module_idx, module_name in enumerate(self.config.model.edit_modules):
+                print(' ', module_idx, module_name)
                 shape = get_shape(get_module(self.model, module_name))
                 keys = tr[module_name].keys.to(torch.float32).to(self.config.editor_device)
                 values_grad = tr[module_name].values_grad.to(torch.float32).to(self.config.editor_device)
                 self.net[str(shape)].normalizer.update(torch.cat((keys, values_grad), -1))
+                os.makedirs(f"{self.config.editor.cache_dir}/", exist_ok=True)
                 torch.save(keys, f"{self.config.editor.cache_dir}/{module_idx}_{idx}_keys.pth")
                 torch.save(values_grad, f"{self.config.editor.cache_dir}/{module_idx}_{idx}_values_grad.pth")
+
+
+                # #### 1 
+                # os.makedirs(f"checkpoints/test_model/", exist_ok=True)
+                # self.model.save_pretrained('checkpoints/test_model/')
+                # print('   SAVED HUGGINGFACE 0 ===>', 'checkpoints/test_model/')
+
+
     
     def run(self, train_loader: DataLoader, valid_loader: DataLoader):
         
-        empty_cache(self.config.editor.cache_dir)
+        # empty_cache(self.config.editor.cache_dir)
+        os.makedirs(f"checkpoints/", exist_ok=True)
         for _ in range(self.config.editor.n_epochs):
             self.train(train_loader)
             self.valid(valid_loader)
-        
-        torch.save(self.net.state_dict(), f"checkpoints/{self.config.model.name_or_path}_{self.config.editor.name}_{str(self.config.data.n_edits)}_net.pth")
-        torch.save(self.opt.state_dict(), f"checkpoints/{self.config.model.name_or_path}_{self.config.editor.name}_{str(self.config.data.n_edits)}_opt.pth")
+        modelname = str(self.config.model.name_or_path)
+        if '/' in modelname: modelname = modelname.split('/')[-1]
+        torch.save(self.net.state_dict(), f"checkpoints/{modelname}_{self.config.editor.name}_{str(self.config.data.n_edits)}_net.pth")
+        torch.save(self.opt.state_dict(), f"checkpoints/{modelname}_{self.config.editor.name}_{str(self.config.data.n_edits)}_opt.pth")
+        os.makedirs(f"checkpoints/test_model/", exist_ok=True)
+        self.model.save_pretrained('checkpoints/test_model/')
+        logging.info('   SAVED HUGGINGFACE 2 ===> checkpoints/test_model/')

@@ -13,7 +13,7 @@ class AutoModelForFEVER(nn.Module):
     def __init__(self, name_or_path: str):
         super().__init__()
 
-        self.backbone = AutoModel.from_pretrained(name_or_path)
+        self.backbone = AutoModel.from_pretrained(name_or_path, cache_dir='cache')
         self.classifier = nn.Linear(self.backbone.config.hidden_size, 1)
 
     def forward(self, **kwargs):
@@ -33,7 +33,7 @@ def make_model(config: DictConfig):
         model.load_state_dict(torch.load(config.weight_path))
     else:
         model_class = getattr(transformers, config.class_name)
-        model = model_class.from_pretrained(config.name_or_path)
+        model = model_class.from_pretrained(config.name_or_path, cache_dir='cache')
 
     if config.half:
         model.bfloat16()

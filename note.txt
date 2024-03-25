@@ -1,0 +1,36 @@
+>>> f = open('zsre/zsre_eval.json')
+>>> data = json.load(f)
+>>> len(data)
+19086
+>>> data[0]
+{'subject': 'Watts Humphrey', 'src': 'What university did Watts Humphrey attend?', 
+'rephrase': 'What university did Watts Humphrey take part in?', 
+'alt': 'University of Michigan', 'loc': 'nq question: who played desmond doss father in hacksaw ridge', 
+'loc_ans': 'Hugo Weaving', 
+'ans': 'Illinois Institute of Technology'}
+
+
+
+{'subject': 'Watts Humphrey', 'src': 'What university did Watts Humphrey attend?', 
+'rephrase': 'What university did Watts Humphrey take part in?', 'alt': 'University of Michigan', 
+'loc': 'nq question: who played desmond doss father in hacksaw ridge', 'loc_ans': 'Hugo Weaving', 
+'ans': 'Illinois Institute of Technology'}, 
+
+{'subject': 'Ramalinaceae', 'src': 'Which family does Ramalinaceae belong to?', 
+'rephrase': 'What family are Ramalinaceae?', 'alt': 'Lamiinae', 
+'loc': 'nq question: types of skiing in the winter olympics 2018', 'loc_ans': 'Downhill', 
+'ans': 'Lecanorales'}, 
+
+{'subject': 'Denny Herzig', 'src': 'What role does Denny Herzig play in football?', 
+'rephrase': "What's Denny Herzig's role in football?", 'alt': 'winger',
+'loc': 'nq question: where does aarp fall on the political spectrum', 'loc_ans': 'non-partisan', 
+'ans': 'defender'}, 
+
+{'subject': 'Call the Doctor', 'src': 'What artist created Call the Doctor?', 
+'rephrase': 'Which artist created Call the Doctor?', 'alt': 'The X-Files', 
+'loc': 'nq question: who sang nice day for a white wedding', 'loc_ans': 'Billy Idol', 
+'ans': 'Sleater-Kinney'}, 
+
+{'subject': 'Lahti Town Hall', 'src': 'Who was the designer of Lahti Town Hall?', 
+'rephrase': 'The architect at Lahti Town Hall, who was that?', 'alt': 'Alfred Lahti', 
+'loc': 'nq question: who sang the theme song for laverne and shirley', 'loc_ans': 'Cyndi Grecco', 'ans': 'Eliel Saarinen'}

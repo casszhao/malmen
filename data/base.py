@@ -2,7 +2,7 @@ from typing import Union, Tuple, List, Dict
 from omegaconf import DictConfig
 
 import math
-import json
+import json, logging
 
 import torch
 from torch.utils.data import Dataset, DataLoader
@@ -71,7 +71,7 @@ def make_loader(
     data_class
 ) -> Tuple[DataLoader]:
     
-    tok = AutoTokenizer.from_pretrained(config.model.name_or_path)
+    tok = AutoTokenizer.from_pretrained(config.model.name_or_path, cache_dir='cache')
 
     train_set = data_class(
         config.data,
@@ -87,10 +87,15 @@ def make_loader(
         config.model_device
     )
 
+    logging.info(' valid and train set len  =========== ')
+    logging.info(len(valid_set), len(train_set))
+
+    logging.info(f' example of valid: {valid_set[1]} \n \n example of train: {train_set[1]}')
+
     train_loader = DataLoader(
-        train_set,
-        config.data.n_edits,
-        True,
+        dataset=train_set,
+        batch_size=config.data.n_edits,
+        shuffle=True,
         collate_fn = train_set.collate_fn,
         drop_last = True
     )

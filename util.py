@@ -12,7 +12,9 @@ def empty_cache(path: str):
     
     suffixes = os.listdir(path)
     for s in suffixes:
-        os.remove(os.path.join(path, s))
+        path_temp = os.path.join(path, s)
+        print('path_temp -->', path_temp)
+        os.remove(path_temp)
 
 def get_module(module: nn.Module, module_name: str) -> nn.Module:
     
